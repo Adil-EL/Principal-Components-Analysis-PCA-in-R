@@ -1,4 +1,4 @@
-
+ # J' ai effectuer des changements"
 My_acp<-function(X)
 {
   Xdata<-X
