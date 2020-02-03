@@ -1,32 +1,36 @@
- # J' ai effectuer des changements"
-My_acp<-function(X)
-{
-  Xdata<-X
+
+
+# 1- Upload the data into the working space plus some preprocessing.
+  Xdata<-read.csv2('data_PDE19.csv')
+  Xdata<-Xdata[,2:9]
+  X<-Xdata
+
+
+# 2- Get the data dimensions
   p<-ncol(X)
   n<-nrow(X)
   
-  # centrer la matrice
+# 3- normalize your data
   
-  for(i in 1:p)
-  {
-    X[,i]<-X[,i]-mean(X[,i])
-  }
-
-  My_cov<-t(X)%*%X
-  My_cov<-My_cov/(n-1)
-  sd_vector<-GMCM:::colSds(X)
-  sd_matrix<-sd_vector%*%t(sd_vector)
+  X<-scale(X, center = T, scale = T)
   
   
-  My_cor<-My_cov/sd_matrix
   
+# 4- the correlation matrix 
+  
+  My_cor<-cor(X)
+  
+ 
+#The eigen values and vectors
   
  lambda<-eigen(My_cor)$values
-  
+ 
   W<-eigen(My_cor)$vectors
   
-  
-  nbrcp<-sum(lambda>=1)
+  # the number of principal components
+  nbrpc<-sum(lambda>=1) # there is many cretarias to determine them 
+                        #for this case we chose the components for  wich 
+                        #the eigen value is >= 1, the Kaiser-Guttman rule
   
   
   barplot(lambda)
@@ -38,36 +42,22 @@ My_acp<-function(X)
   barplot(Inr_cum)
   title("cascade des valeurs propres cumulées ")
   
-  C<-Xdata%*%W # Les composantes principales
-  Cp<-Xdata%*%W[,1:nbrcp]
+  C<-as.matrix(Xdata)%*%W # the projection of the variables' matrix on the new space
+ 
   
-  C_carre<-C*C
-  Cp_carre<-Cp*Cp
-  Qinformation<-rowSums(Cp_carre)/rowSums(C_carre)
+  Cp<-C[,1:nbrpc] # selecting the principale components
   
-  Gamma<-matrix(0,nrow=n,ncol=p)
-  for (j in 1:p)
-  {
-    Gamma[,j]<-C_carre[,j]/lambda[j]
-  }
+ 
+ # the Cp matrix  descibes the individuals using fewer variabales
+ # and saving a maximum of variation.
+
   
-  Gamma<-Gamma/n
+# The code above is a right to the point procedure,to provide more details
+# you can use the built in fuction below: 
+# PCA from the FactoMiner package
   
-  #6-dudi.pca(Xdata)
+
+#As a reminder the pca is used as a dimentiality reduction method,
+#But it still have many limitations.
   
-  R<-matrix(0,nrow=p,ncol=p)
-  for(j in 1:p)
-  {
-    R[,j]<-sqrt(lambda[j])*W[,j] # les coefficient de corelation linéare 
-  }
-  
-  # plot
-  
-  #plot(Cp[,1],Cp[,2])
-  #plot(Cp[,1],Cp[,3])
-  #plot(Cp[,2],Cp[,3])
-  #print("le vecteur  qualité d'information")
-  result<-list(nbrcp,My_cor,Qinformation)
-  
-  return(result)
-}
+
