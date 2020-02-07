@@ -28,10 +28,12 @@ def My_PCA(X):
     
     
     # the projection of the variables' matrix on the new space
-    X=np.dot(Xorg,W)
+    X=np.matmul(W,Xorg)
     
     return X
     
+
+
 
 
   
